@@ -1,0 +1,448 @@
+/* ---------------------------------------------------------
+   GLOBAL LAYOUT
+--------------------------------------------------------- */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f6fa;
+  margin: 0;
+}
+
+.dashboard {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Main panel */
+.main-panel {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: #f9fafb;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #111827;
+}
+
+/* Chat panel */
+.chat-panel {
+  width: 26rem;
+  background-color: #ffffff;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------
+   CARD & GENERAL UI ELEMENTS
+--------------------------------------------------------- */
+.card {
+  background-color: #fff;
+  padding: 1.5rem 2rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: 0px 3px 15px rgba(0,0,0,0.06);
+}
+
+.card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+
+/* Buttons */
+button {
+  padding: 0.6rem 1.2rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.25s;
+}
+
+button:hover:not(:disabled) {
+  background-color: #1e4fd6;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  background-color: #b5bcc8;
+  cursor: not-allowed;
+}
+
+/* Form Inputs */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"] {
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  background-color: #fafafa;
+  outline: none;
+}
+
+input:hover,
+input:focus {
+  border-color: #2563eb;
+  background-color: #fff;
+}
+
+/* ---------------------------------------------------------
+   ADD CANDIDATE FORM
+--------------------------------------------------------- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+
+/* Success & Error */
+.message.success {
+  color: #15803d;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+.message.error {
+  color: #b91c1c;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------
+   CANDIDATE TABLE LIST
+--------------------------------------------------------- */
+.candidate-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0px 3px 15px rgba(0,0,0,0.06);
+}
+
+.candidate-table th {
+  background: #f3f4f6;
+  padding: 0.9rem;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.candidate-table td {
+  padding: 0.9rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.candidate-table tr:hover {
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+/* Status badge */
+.status-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-initiated { background: #e0e7ff; color: #3730a3; }
+.status-requested { background: #fef9c3; color: #854d0e; }
+.status-offer { background: #dbeafe; color: #1e3a8a; }
+.status-accepted { background: #d1fae5; color: #065f46; }
+.status-onboarded { background: #ede9fe; color: #5b21b6; }
+.status-default { background: #e5e7eb; color: #374151; }
+
+/* ---------------------------------------------------------
+   CANDIDATE DETAILS
+--------------------------------------------------------- */
+.back-button {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  cursor: pointer;
+}
+
+.candidate-details {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2.5rem;
+}
+
+.verification-section h3 {
+  margin-top: 1rem;
+}
+
+.verification-status {
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.verification-status.verified { color: #16a34a; }
+.verification-status.mismatch { color: #dc2626; }
+.verification-status.pending { color: #6b7280; }
+
+/* Activity Log */
+.activity-log {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #f3f4f6;
+}
+
+.activity-log li {
+  margin-bottom: 0.7rem;
+  padding-left: 0.6rem;
+  border-left: 3px solid #2563eb;
+}
+
+/* ---------------------------------------------------------
+   CHATBOT PANEL
+--------------------------------------------------------- */
+.chatbot {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-title {
+  padding: 1rem 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  padding: 1rem 1.3rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Chat bubbles */
+.chat-message.user {
+  align-self: flex-end;
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  max-width: 75%;
+  line-height: 1.4;
+}
+
+.chat-message.bot {
+  align-self: flex-start;
+  background-color: #ffffff;
+  color: #1f2937;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  max-width: 75%;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.08);
+  line-height: 1.4;
+}
+
+/* Action Buttons */
+.action-button {
+  background-color: #eef2ff;
+  color: #3730a3;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: none;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.action-button:hover {
+  background-color: #e0e7ff;
+}
+
+.message-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Chat input */
+.chat-input-form {
+  display: flex;
+  border-top: 1px solid #e5e7eb;
+  padding: 0.8rem 1rem;
+  gap: 0.8rem;
+}
+
+.chat-input-form input {
+  flex-grow: 1;
+  padding: 0.7rem;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+}
+
+.chat-input-form input:focus {
+  border-color: #2563eb;
+  background: white;
+}
+
+.chat-input-form button {
+  border-radius: 10px;
+}
+
+/* Typing indicator */
+.typing-indicator span {
+  height: 7px;
+  width: 7px;
+  background-color: #9ca3af;
+}
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  font-family: sans-serif;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.status-badge {
+  background: #e3f2fd;
+  color: #0d47a1;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.doc-table th, .doc-table td {
+  border: 1px solid #eee;
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.doc-table th {
+  background-color: #f4f6f8;
+  font-weight: 600;
+}
+
+.text-center { text-align: center !important; }
+
+.tag { padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+.tag.success { background: #d4edda; color: #155724; }
+.tag.error { background: #f8d7da; color: #721c24; }
+.text-muted { color: #999; }
+
+.drive-link {
+  display: inline-block;
+  margin-bottom: 15px;
+  text-decoration: none;
+  color: #1a73e8;
+  font-weight: bold;
+  padding: 8px 0;
+}
+
+.activity-log {
+  margin-top: 30px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.activity-log ul {
+  list-style: none;
+  padding: 0;
+}
+
+.activity-log li {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f9f9f9;
+  padding-bottom: 5px;
+}
+
+.log-time {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #333;
+}
+
+.back-button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 15px;
+  padding: 0;
+}
+.back-button:hover {
+  text-decoration: underline;
+}
+.tag-success { background: #dcfce7; color: #166534; }
+.tag-info { background: #dbeafe; color: #1e40af; }
+.tag-warning { background: #fef3c7; color: #92400e; }
+.tag-error { background: #fee2e2; color: #991b1b; }
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.refresh-btn {
+  font-size: 12px;
+  background: none;
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.refresh-btn:hover { background: #f9f9f9; }
+
+.custom-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
