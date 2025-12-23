@@ -1,10 +1,27 @@
 /* ---------------------------------------------------------
-   GLOBAL LAYOUT
+   1. GLOBAL LAYOUT & VARIABLES
 --------------------------------------------------------- */
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1e4fd6;
+  --bg-main: #f5f6fa;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  
+  /* Status Colors */
+  --success: #10b981;
+  --info: #3b82f6;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f5f6fa;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-main);
   margin: 0;
+  color: var(--text-main);
 }
 
 .dashboard {
@@ -13,7 +30,6 @@ body {
   overflow: hidden;
 }
 
-/* Main panel */
 .main-panel {
   flex-grow: 1;
   padding: 2rem;
@@ -21,104 +37,75 @@ body {
   background-color: #f9fafb;
 }
 
-.dashboard-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  color: #111827;
-}
-
-/* Chat panel */
 .chat-panel {
   width: 26rem;
   background-color: #ffffff;
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
 }
 
 /* ---------------------------------------------------------
-   CARD & GENERAL UI ELEMENTS
+   2. REUSABLE COMPONENTS (Cards, Buttons, Inputs)
 --------------------------------------------------------- */
 .card {
-  background-color: #fff;
+  background-color: var(--bg-card);
   padding: 1.5rem 2rem;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-bottom: 2rem;
-  box-shadow: 0px 3px 15px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.card-title {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 1.2rem;
+.dashboard-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  color: var(--text-main);
 }
 
-/* Buttons */
 button {
   padding: 0.6rem 1.2rem;
-  background-color: #2563eb;
+  background-color: var(--primary);
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: 0.25s;
+  transition: all 0.2s ease;
 }
 
 button:hover:not(:disabled) {
-  background-color: #1e4fd6;
+  background-color: var(--primary-hover);
   transform: translateY(-1px);
 }
 
 button:disabled {
-  background-color: #b5bcc8;
+  background-color: #d1d5db;
   cursor: not-allowed;
 }
 
-/* Form Inputs */
-input[type="text"],
-input[type="email"],
-input[type="number"],
-input[type="date"] {
-  padding: 0.6rem;
+/* Specific button variants */
+.btn-secondary { background-color: #64748b; }
+.btn-secondary:hover { background-color: #475569; }
+.btn-success { background-color: var(--success); }
+.btn-success:hover { background-color: #059669; }
+
+input {
+  padding: 0.7rem;
   border-radius: 8px;
   border: 1px solid #d1d5db;
   font-size: 0.95rem;
-  background-color: #fafafa;
   outline: none;
+  transition: border 0.2s;
 }
 
-input:hover,
 input:focus {
-  border-color: #2563eb;
-  background-color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 /* ---------------------------------------------------------
-   ADD CANDIDATE FORM
---------------------------------------------------------- */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.2rem;
-}
-
-/* Success & Error */
-.message.success {
-  color: #15803d;
-  margin-top: 1rem;
-  font-weight: 600;
-}
-
-.message.error {
-  color: #b91c1c;
-  margin-top: 1rem;
-  font-weight: 600;
-}
-
-/* ---------------------------------------------------------
-   CANDIDATE TABLE LIST
+   3. CANDIDATE LIST (Table)
 --------------------------------------------------------- */
 .candidate-table {
   width: 100%;
@@ -126,323 +113,260 @@ input:focus {
   background: white;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0px 3px 15px rgba(0,0,0,0.06);
 }
 
 .candidate-table th {
-  background: #f3f4f6;
-  padding: 0.9rem;
+  background: #f8fafc;
+  padding: 1rem;
   text-align: left;
-  font-size: 0.9rem;
-  color: #4b5563;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
 }
 
 .candidate-table td {
-  padding: 0.9rem;
-  border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
 }
 
 .candidate-table tr:hover {
-  background: #f9fafb;
+  background: #f1f5f9;
   cursor: pointer;
 }
-
-/* Status badge */
-.status-badge {
-  padding: 0.3rem 0.7rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-initiated { background: #e0e7ff; color: #3730a3; }
-.status-requested { background: #fef9c3; color: #854d0e; }
-.status-offer { background: #dbeafe; color: #1e3a8a; }
-.status-accepted { background: #d1fae5; color: #065f46; }
-.status-onboarded { background: #ede9fe; color: #5b21b6; }
-.status-default { background: #e5e7eb; color: #374151; }
 
 /* ---------------------------------------------------------
-   CANDIDATE DETAILS
+   4. ADD CANDIDATE FORM
 --------------------------------------------------------- */
-.back-button {
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 1rem;
-  margin-bottom: 1.2rem;
-  cursor: pointer;
-}
-
-.candidate-details {
+.form-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
 }
 
-.verification-section h3 {
-  margin-top: 1rem;
-}
-
-.verification-status {
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
   margin-bottom: 0.4rem;
-  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
-.verification-status.verified { color: #16a34a; }
-.verification-status.mismatch { color: #dc2626; }
-.verification-status.pending { color: #6b7280; }
+.form-group input { width: 100%; box-sizing: border-box; }
 
-/* Activity Log */
-.activity-log {
-  background: #ffffff;
-  padding: 1rem;
-  border-radius: 10px;
-  border: 1px solid #f3f4f6;
-}
-
-.activity-log li {
-  margin-bottom: 0.7rem;
-  padding-left: 0.6rem;
-  border-left: 3px solid #2563eb;
-}
+.message { font-weight: 600; margin-top: 1rem; font-size: 0.9rem; }
+.message.success { color: var(--success); }
+.message.error { color: var(--error); }
 
 /* ---------------------------------------------------------
-   CHATBOT PANEL
+   5. CANDIDATE DETAILS VIEW
 --------------------------------------------------------- */
-.chatbot {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-title {
-  padding: 1rem 1.5rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  background-color: #f3f4f6;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.chat-messages {
-  flex-grow: 1;
-  padding: 1rem 1.3rem;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-/* Chat bubbles */
-.chat-message.user {
-  align-self: flex-end;
-  background-color: #2563eb;
-  color: white;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  max-width: 75%;
-  line-height: 1.4;
-}
-
-.chat-message.bot {
-  align-self: flex-start;
-  background-color: #ffffff;
-  color: #1f2937;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  max-width: 75%;
-  box-shadow: 0px 2px 6px rgba(0,0,0,0.08);
-  line-height: 1.4;
-}
-
-/* Action Buttons */
-.action-button {
-  background-color: #eef2ff;
-  color: #3730a3;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: none;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-.action-button:hover {
-  background-color: #e0e7ff;
-}
-
-.message-actions {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* Chat input */
-.chat-input-form {
-  display: flex;
-  border-top: 1px solid #e5e7eb;
-  padding: 0.8rem 1rem;
-  gap: 0.8rem;
-}
-
-.chat-input-form input {
-  flex-grow: 1;
-  padding: 0.7rem;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background-color: #f9fafb;
-}
-
-.chat-input-form input:focus {
-  border-color: #2563eb;
-  background: white;
-}
-
-.chat-input-form button {
-  border-radius: 10px;
-}
-
-/* Typing indicator */
-.typing-indicator span {
-  height: 7px;
-  width: 7px;
-  background-color: #9ca3af;
-}
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  font-family: sans-serif;
-}
-
-.header-section {
+.detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
 }
-
-.status-badge {
-  background: #e3f2fd;
-  color: #0d47a1;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.9em;
-  font-weight: bold;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  background: #f9f9f9;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.doc-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-.doc-table th, .doc-table td {
-  border: 1px solid #eee;
-  padding: 12px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-.doc-table th {
-  background-color: #f4f6f8;
-  font-weight: 600;
-}
-
-.text-center { text-align: center !important; }
-
-.tag { padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
-.tag.success { background: #d4edda; color: #155724; }
-.tag.error { background: #f8d7da; color: #721c24; }
-.text-muted { color: #999; }
-
-.drive-link {
-  display: inline-block;
-  margin-bottom: 15px;
-  text-decoration: none;
-  color: #1a73e8;
-  font-weight: bold;
-  padding: 8px 0;
-}
-
-.activity-log {
-  margin-top: 30px;
-  border-top: 1px solid #eee;
-  padding-top: 15px;
-}
-
-.activity-log ul {
-  list-style: none;
-  padding: 0;
-}
-
-.activity-log li {
-  font-size: 13px;
-  color: #555;
-  margin-bottom: 8px;
-  border-bottom: 1px solid #f9f9f9;
-  padding-bottom: 5px;
-}
-
-.log-time {
-  font-weight: bold;
-  margin-right: 10px;
-  color: #333;
-}
-
-.back-button {
-  cursor: pointer;
-  border: none;
-  background: none;
-  color: #666;
-  font-size: 16px;
-  margin-bottom: 15px;
-  padding: 0;
-}
-.back-button:hover {
-  text-decoration: underline;
-}
-.tag-success { background: #dcfce7; color: #166534; }
-.tag-info { background: #dbeafe; color: #1e40af; }
-.tag-warning { background: #fef3c7; color: #92400e; }
-.tag-error { background: #fee2e2; color: #991b1b; }
 
 .action-buttons {
   display: flex;
   gap: 10px;
 }
 
-.detail-header {
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  background: #f8fafc;
+  padding: 1.2rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.info-grid div { font-size: 0.9rem; }
+
+.section-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin: 1.5rem 0 1rem 0;
 }
 
 .refresh-btn {
-  font-size: 12px;
-  background: none;
-  border: 1px solid #ddd;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 0.75rem;
+  padding: 5px 12px;
 }
 
-.refresh-btn:hover { background: #f9f9f9; }
-
-.custom-checkbox {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
+/* Document Table Specifics */
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
 }
+
+.doc-table th, .doc-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.doc-table th { background: #f8fafc; font-size: 0.8rem; }
+
+.pdf-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.pdf-link:hover { text-decoration: underline; }
+
+.drive-link-box {
+  background: #eff6ff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  margin-bottom: 1.5rem;
+}
+
+.drive-link-box a {
+  text-decoration: none;
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------
+   6. BADGES & TAGS
+--------------------------------------------------------- */
+.status-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.status-initiated { background: #e0e7ff; color: #3730a3; }
+.status-requested { background: #fef9c3; color: #854d0e; }
+.status-accepted { background: #dcfce7; color: #166534; }
+.status-onboarded { background: #f3e8ff; color: #6b21a8; }
+
+.tag {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tag-success { background: #dcfce7; color: #166534; } /* Verified */
+.tag-info { background: #dbeafe; color: #1e40af; }    /* Uploaded */
+.tag-warning { background: #fef3c7; color: #92400e; } /* Exception */
+.tag-error { background: #fee2e2; color: #991b1b; }   /* Missing */
+
+/* ---------------------------------------------------------
+   7. CHATBOT
+--------------------------------------------------------- */
+.chat-messages {
+  flex-grow: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #fcfcfc;
+}
+
+.chat-message.bot .message-text {
+  background: white;
+  border: 1px solid var(--border);
+  color: #374151;
+  padding: 0.8rem 1rem;
+  border-radius: 0 12px 12px 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  max-width: 85%;
+  font-size: 0.9rem;
+}
+
+.chat-message.user {
+  align-self: flex-end;
+  background: var(--primary);
+  color: white;
+  padding: 0.8rem 1rem;
+  border-radius: 12px 12px 0 12px;
+  max-width: 85%;
+  font-size: 0.9rem;
+}
+
+.message-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+}
+
+.chat-input-form {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+}
+
+/* ---------------------------------------------------------
+   8. ACTIVITY TIMELINE
+--------------------------------------------------------- */
+.activity-log { margin-top: 2rem; }
+
+.log-list {
+  border-left: 2px solid var(--border);
+  margin-left: 10px;
+  padding-left: 20px;
+}
+
+.log-item {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.log-item::before {
+  content: "";
+  position: absolute;
+  left: -26px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+.log-time {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.log-event {
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+/* ---------------------------------------------------------
+   9. UTILITIES
+--------------------------------------------------------- */
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }

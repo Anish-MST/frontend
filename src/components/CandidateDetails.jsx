@@ -4,8 +4,6 @@ import './Dashboard.css';
 
 const API_URL = 'https://backend-4kvw.onrender.com/api';
 
-// Keyword map matching the Cron/Drive service logic
-// CandidateDetails.jsx - Update the DOC_KEYWORDS object
 const DOC_KEYWORDS = {
   aadhaar: ["aadhaar", "adhar", "uid", "adhaar", "aadhar"],
   pan: ["pan", "pancard"],
@@ -23,10 +21,11 @@ const DEFAULT_DOC_SCHEMA = {
 };
 
 export default function CandidateDetails({ candidate, onBack }) {
-  const [driveFiles, setDriveFiles] = useState([]); // Always initialize as array
+  const [driveFiles, setDriveFiles] = useState([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   
+  // Use candidate's docStatus or the default schema if not yet initialized
   const [docStatus, setDocStatus] = useState(
     (candidate.docStatus && Object.keys(candidate.docStatus).length > 0) 
       ? candidate.docStatus 
@@ -38,37 +37,46 @@ export default function CandidateDetails({ candidate, onBack }) {
       fetchFiles();
     }
   }, [candidate.driveFolderId]);
-// CandidateDetails.jsx
 
-const fetchFiles = async () => {
-  setLoadingFiles(true);
-  try {
-    const res = await axios.get(`${API_URL}/workflow/files/${candidate.driveFolderId}`);
-    
-    console.log("📂 Raw Data:", res.data);
-
-    // FIX: Look for res.data.files since the backend returns an object
-    let filesData = [];
-    
-    if (res.data && Array.isArray(res.data.files)) {
-      filesData = res.data.files;
-    } else if (Array.isArray(res.data)) {
-      filesData = res.data;
+  const fetchFiles = async () => {
+    setLoadingFiles(true);
+    try {
+      const res = await axios.get(`${API_URL}/workflow/files/${candidate.driveFolderId}`);
+      // Handle both {files: []} and [] formats
+      const filesData = res.data.files || res.data || [];
+      setDriveFiles(filesData);
+    } catch (err) {
+      console.error("Failed to load drive files", err);
+      setDriveFiles([]);
+    } finally {
+      setLoadingFiles(false);
     }
+  };
 
-    setDriveFiles(filesData);
-  } catch (err) {
-    console.error("Failed to load drive files", err);
-    setDriveFiles([]);
-  } finally {
-    setLoadingFiles(false);
-  }
-};
+  /**
+   * Tells the backend to scan the Drive folder and update Firestore "uploaded" flags
+   */
+  const handleManualSync = async () => {
+    setLoadingFiles(true);
+    try {
+      const res = await axios.post(`${API_URL}/workflow/sync-drive-state`, {
+        candidateId: candidate.id
+      });
+      if (res.data.docStatus) setDocStatus(res.data.docStatus);
+      if (res.data.files) setDriveFiles(res.data.files);
+      alert("Backend sync complete! Document flags updated.");
+    } catch (err) {
+      alert("Sync failed.");
+    } finally {
+      setLoadingFiles(false);
+    }
+  };
 
   const handleToggle = async (docKey, field) => {
     const currentDoc = docStatus[docKey] || DEFAULT_DOC_SCHEMA[docKey];
     const newValue = !currentDoc[field];
     
+    // Update UI immediately
     setDocStatus(prev => ({
       ...prev,
       [docKey]: { ...prev[docKey], [field]: newValue }
@@ -82,7 +90,7 @@ const fetchFiles = async () => {
         value: newValue
       });
     } catch (error) {
-      console.error("Backend sync failed", error);
+      console.error("Backend update failed", error);
     }
   };
 
@@ -90,12 +98,26 @@ const fetchFiles = async () => {
     setActionLoading(true);
     try {
       await axios.post(`${API_URL}/workflow/resend-mail`, {
-        candidateName: candidate.name,
+        candidateId: candidate.id, // Fixed: Pass ID instead of Name
         mailNumber
       });
-      alert(`Mail ${mailNumber} resent successfully!`);
+      alert(`Mail sequence ${mailNumber} resent successfully!`);
     } catch (err) {
-      alert("Error resending mail");
+      alert("Error resending mail. Check backend logs.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const finalizeOnboarding = async () => {
+    if (!window.confirm("Mark this candidate as fully ONBOARDED?")) return;
+    setActionLoading(true);
+    try {
+      await axios.post(`${API_URL}/workflow/finalize-onboarding`, { candidateId: candidate.id });
+      alert("Candidate Onboarded Successfully!");
+      onBack(); // Refresh list
+    } catch (err) {
+      alert("Failed to finalize onboarding.");
     } finally {
       setActionLoading(false);
     }
@@ -108,8 +130,17 @@ const fetchFiles = async () => {
       <div className="detail-header">
         <button className="back-button" onClick={onBack}>← Back to List</button>
         <div className="action-buttons">
-          <button className="btn-secondary" onClick={() => triggerResend(1)} disabled={actionLoading}>Resend Prov. Offer</button>
-          <button className="btn-primary" onClick={() => triggerResend(2)} disabled={actionLoading}>Resend Formal & Drive Access</button>
+          <button className="btn-secondary" onClick={() => triggerResend(1)} disabled={actionLoading}>
+            Resend Initial Request
+          </button>
+          <button className="btn-primary" onClick={() => triggerResend(2)} disabled={actionLoading}>
+            Resend Drive Access
+          </button>
+          {candidate.status !== 'Onboarded' && (
+             <button className="btn-success" onClick={finalizeOnboarding} disabled={actionLoading} style={{marginLeft: '10px', background: '#10b981', color: 'white'}}>
+               Finalize Onboarding
+             </button>
+          )}
         </div>
       </div>
 
@@ -130,9 +161,9 @@ const fetchFiles = async () => {
         <hr/>
         
         <div className="section-title-row">
-          <h3>Document Checklist (PDF Only)</h3>
-          <button className="refresh-btn" onClick={fetchFiles} disabled={loadingFiles}>
-            {loadingFiles ? "Syncing..." : "🔄 Refresh Drive State"}
+          <h3>Document Verification Checklist</h3>
+          <button className="refresh-btn" onClick={handleManualSync} disabled={loadingFiles}>
+            {loadingFiles ? "Syncing..." : "🔄 Trigger Full Drive Sync"}
           </button>
         </div>
         
@@ -143,11 +174,8 @@ const fetchFiles = async () => {
               target="_blank" 
               rel="noopener noreferrer"
             >
-              📂 Open Candidate Folder in Google Drive
+              📂 Open Official Folder in Google Drive
             </a>
-            <p className="text-muted" style={{fontSize: '11px', marginTop: '5px'}}>
-              Note: Access is shared with <strong>{candidate.email}</strong>
-            </p>
           </div>
         )}
 
@@ -165,12 +193,11 @@ const fetchFiles = async () => {
             {Object.keys(DEFAULT_DOC_SCHEMA).map((key) => {
               const doc = docStatus[key] || DEFAULT_DOC_SCHEMA[key];
               
-              // Logic: Match Drive files based on keywords
+              // Local detection for UI feedback
               const matchingFile = driveFiles.find(file => 
                 DOC_KEYWORDS[key].some(keyword => file.name.toLowerCase().includes(keyword))
               );
 
-              // Status Priority: Verified > Approval > Uploaded > Missing
               let statusLabel = "Missing";
               let badgeClass = "tag-error";
 
@@ -178,9 +205,9 @@ const fetchFiles = async () => {
                 statusLabel = "Verified";
                 badgeClass = "tag-success";
               } else if (doc.specialApproval) {
-                statusLabel = "Approval (Exc)";
+                statusLabel = "Exception";
                 badgeClass = "tag-warning";
-              } else if (matchingFile) {
+              } else if (matchingFile || doc.uploaded) {
                 statusLabel = "Uploaded";
                 badgeClass = "tag-info";
               }
@@ -194,10 +221,10 @@ const fetchFiles = async () => {
                   <td>
                     {matchingFile ? (
                       <a href={matchingFile.webViewLink} target="_blank" rel="noreferrer" className="pdf-link">
-                        📄 {matchingFile.name.length > 20 ? matchingFile.name.substring(0,20) + '...' : matchingFile.name}
+                        📄 {matchingFile.name.length > 25 ? matchingFile.name.substring(0,25) + '...' : matchingFile.name}
                       </a>
                     ) : (
-                      <span className="text-muted">Not detected</span>
+                      <span className="text-muted">Not found</span>
                     )}
                   </td>
                   <td className="text-center">
