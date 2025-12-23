@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './Dashboard.css'; // Ensure you have styles for the new elements
 
-const API_URL = 'http://localhost:4000/api';
+const API_URL = 'https://backend-4kvw.onrender.com/api';
 
 export default function Chatbot() {
   const [messages, setMessages] = useState([]);

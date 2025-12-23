@@ -6,7 +6,7 @@ import CandidateDetails from './CandidateDetails';
 import Chatbot from './Chatbot';
 import './Dashboard.css';
 
-const API_URL = 'http://localhost:4000/api';
+const API_URL = 'https://backend-4kvw.onrender.com/api';
 
 export default function Dashboard() {
   const [candidates, setCandidates] = useState([]);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
 
-const API_URL = 'http://localhost:4000/api';
+const API_URL = 'https://backend-4kvw.onrender.com/api';
 
 // Keyword map matching the Cron/Drive service logic
 // CandidateDetails.jsx - Update the DOC_KEYWORDS object
