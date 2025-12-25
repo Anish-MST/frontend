@@ -2,22 +2,28 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
 
-const API_URL = 'https://backend-4kvw.onrender.com/api';
-
+const API_URL =
+  import.meta.env.MODE === 'production'
+    ? 'https://backend-4kvw.onrender.com/api'
+    : 'http://localhost:4000/api';
+/**
+ * Updated Keywords (Requirement #3: Passbook removed)
+ */
 const DOC_KEYWORDS = {
   aadhaar: ["aadhaar", "adhar", "uid", "adhaar", "aadhar"],
   pan: ["pan", "pancard"],
   education: ["education", "degree", "certificate", "mark", "10th", "12th", "btech", "graduation", "diploma"],
   photo: ["photo", "passport", "selfie", "image", "pic"],
-  passbook: ["passbook", "bank", "cheque", "statement", "pass_book", "bank_statement"]
 };
 
+/**
+ * Updated Default Schema (Requirement #3: Passbook removed)
+ */
 const DEFAULT_DOC_SCHEMA = {
   aadhaar: { name: "Aadhaar Card", uploaded: false, verified: false, specialApproval: false },
   pan: { name: "PAN Card", uploaded: false, verified: false, specialApproval: false },
   education: { name: "Education Certificate", uploaded: false, verified: false, specialApproval: false },
   photo: { name: "Passport Photo", uploaded: false, verified: false, specialApproval: false },
-  passbook: { name: "Bank Passbook", uploaded: false, verified: false, specialApproval: false }
 };
 
 export default function CandidateDetails({ candidate, onBack }) {
@@ -25,7 +31,7 @@ export default function CandidateDetails({ candidate, onBack }) {
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   
-  // Use candidate's docStatus or the default schema if not yet initialized
+  // Initialize state from candidate data or default schema
   const [docStatus, setDocStatus] = useState(
     (candidate.docStatus && Object.keys(candidate.docStatus).length > 0) 
       ? candidate.docStatus 
@@ -42,7 +48,6 @@ export default function CandidateDetails({ candidate, onBack }) {
     setLoadingFiles(true);
     try {
       const res = await axios.get(`${API_URL}/workflow/files/${candidate.driveFolderId}`);
-      // Handle both {files: []} and [] formats
       const filesData = res.data.files || res.data || [];
       setDriveFiles(filesData);
     } catch (err) {
@@ -54,7 +59,7 @@ export default function CandidateDetails({ candidate, onBack }) {
   };
 
   /**
-   * Tells the backend to scan the Drive folder and update Firestore "uploaded" flags
+   * Triggers backend to scan Drive and update 'uploaded' status
    */
   const handleManualSync = async () => {
     setLoadingFiles(true);
@@ -64,7 +69,7 @@ export default function CandidateDetails({ candidate, onBack }) {
       });
       if (res.data.docStatus) setDocStatus(res.data.docStatus);
       if (res.data.files) setDriveFiles(res.data.files);
-      alert("Backend sync complete! Document flags updated.");
+      alert("Drive sync complete!");
     } catch (err) {
       alert("Sync failed.");
     } finally {
@@ -72,11 +77,29 @@ export default function CandidateDetails({ candidate, onBack }) {
     }
   };
 
+  /**
+   * Requirement #5: Release Offer Letter
+   * Scans Drive for _Offer_Letter_MST and mails it.
+   */
+  const handleReleaseOffer = async () => {
+    if (!window.confirm("Release MST Official Offer Letter and Employment Agreement to candidate?")) return;
+    setActionLoading(true);
+    try {
+      const res = await axios.post(`${API_URL}/workflow/release-offer-letter`, {
+        candidateId: candidate.id
+      });
+      alert(res.data.message || "Offer letter released successfully!");
+    } catch (err) {
+      alert(err.response?.data?.error || "Error: No offer letter found with the required naming convention (_Offer_Letter_MST).");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleToggle = async (docKey, field) => {
     const currentDoc = docStatus[docKey] || DEFAULT_DOC_SCHEMA[docKey];
     const newValue = !currentDoc[field];
     
-    // Update UI immediately
     setDocStatus(prev => ({
       ...prev,
       [docKey]: { ...prev[docKey], [field]: newValue }
@@ -98,12 +121,12 @@ export default function CandidateDetails({ candidate, onBack }) {
     setActionLoading(true);
     try {
       await axios.post(`${API_URL}/workflow/resend-mail`, {
-        candidateId: candidate.id, // Fixed: Pass ID instead of Name
+        candidateId: candidate.id,
         mailNumber
       });
       alert(`Mail sequence ${mailNumber} resent successfully!`);
     } catch (err) {
-      alert("Error resending mail. Check backend logs.");
+      alert("Error resending mail.");
     } finally {
       setActionLoading(false);
     }
@@ -115,7 +138,7 @@ export default function CandidateDetails({ candidate, onBack }) {
     try {
       await axios.post(`${API_URL}/workflow/finalize-onboarding`, { candidateId: candidate.id });
       alert("Candidate Onboarded Successfully!");
-      onBack(); // Refresh list
+      onBack(); 
     } catch (err) {
       alert("Failed to finalize onboarding.");
     } finally {
@@ -131,13 +154,28 @@ export default function CandidateDetails({ candidate, onBack }) {
         <button className="back-button" onClick={onBack}>← Back to List</button>
         <div className="action-buttons">
           <button className="btn-secondary" onClick={() => triggerResend(1)} disabled={actionLoading}>
-            Resend Initial Request
+            Resend Provisional
           </button>
-          <button className="btn-primary" onClick={() => triggerResend(2)} disabled={actionLoading}>
-            Resend Drive Access
-          </button>
+          
+          {/* Requirement #5: Release Offer Letter Button */}
           {candidate.status !== 'Onboarded' && (
-             <button className="btn-success" onClick={finalizeOnboarding} disabled={actionLoading} style={{marginLeft: '10px', background: '#10b981', color: 'white'}}>
+            <button 
+              className="btn-primary" 
+              onClick={handleReleaseOffer} 
+              disabled={actionLoading}
+              style={{ background: '#6366f1', color: 'white' }}
+            >
+              {actionLoading ? "Processing..." : "🚀 Release Offer Letter"}
+            </button>
+          )}
+
+          {candidate.status !== 'Onboarded' && (
+             <button 
+               className="btn-success" 
+               onClick={finalizeOnboarding} 
+               disabled={actionLoading} 
+               style={{marginLeft: '10px', background: '#10b981', color: 'white'}}
+             >
                Finalize Onboarding
              </button>
           )}
@@ -193,7 +231,6 @@ export default function CandidateDetails({ candidate, onBack }) {
             {Object.keys(DEFAULT_DOC_SCHEMA).map((key) => {
               const doc = docStatus[key] || DEFAULT_DOC_SCHEMA[key];
               
-              // Local detection for UI feedback
               const matchingFile = driveFiles.find(file => 
                 DOC_KEYWORDS[key].some(keyword => file.name.toLowerCase().includes(keyword))
               );
@@ -250,7 +287,7 @@ export default function CandidateDetails({ candidate, onBack }) {
         <div className="activity-log">
           <h3>Activity Timeline</h3>
           <div className="log-list">
-            {candidate.log?.slice().reverse().map((entry, index) => (
+            {(candidate.log || []).slice().reverse().map((entry, index) => (
               <div key={index} className="log-item">
                 <span className="log-time">{new Date(entry.timestamp).toLocaleString()}</span>
                 <span className="log-event">{entry.event}</span>

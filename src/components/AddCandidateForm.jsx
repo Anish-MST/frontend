@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
 
-const API_URL = 'https://backend-4kvw.onrender.com/api';
+const API_URL =
+  import.meta.env.MODE === 'production'
+    ? 'https://backend-4kvw.onrender.com/api'
+    : 'http://localhost:4000/api';
 
 export default function AddCandidateForm({ onCandidateAdded }) {
   const [formData, setFormData] = useState({
