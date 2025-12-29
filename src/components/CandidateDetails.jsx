@@ -6,10 +6,12 @@ const API_URL =
   import.meta.env.MODE === 'production'
     ? 'https://backend-4kvw.onrender.com/api'
     : 'http://localhost:4000/api';
+
 /**
- * Updated Keywords (Requirement #3: Passbook removed)
+ * Updated Keywords: Includes NDA requirement
  */
 const DOC_KEYWORDS = {
+  nda: ["signed nda", "signed_nda", "nda_signed", "signed agreement"],
   aadhaar: ["aadhaar", "adhar", "uid", "adhaar", "aadhar"],
   pan: ["pan", "pancard"],
   education: ["education", "degree", "certificate", "mark", "10th", "12th", "btech", "graduation", "diploma"],
@@ -17,9 +19,10 @@ const DOC_KEYWORDS = {
 };
 
 /**
- * Updated Default Schema (Requirement #3: Passbook removed)
+ * Updated Default Schema: Includes Signed NDA
  */
 const DEFAULT_DOC_SCHEMA = {
+  nda: { name: "Signed NDA", uploaded: false, verified: false, specialApproval: false },
   aadhaar: { name: "Aadhaar Card", uploaded: false, verified: false, specialApproval: false },
   pan: { name: "PAN Card", uploaded: false, verified: false, specialApproval: false },
   education: { name: "Education Certificate", uploaded: false, verified: false, specialApproval: false },
@@ -31,7 +34,6 @@ export default function CandidateDetails({ candidate, onBack }) {
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   
-  // Initialize state from candidate data or default schema
   const [docStatus, setDocStatus] = useState(
     (candidate.docStatus && Object.keys(candidate.docStatus).length > 0) 
       ? candidate.docStatus 
@@ -58,9 +60,6 @@ export default function CandidateDetails({ candidate, onBack }) {
     }
   };
 
-  /**
-   * Triggers backend to scan Drive and update 'uploaded' status
-   */
   const handleManualSync = async () => {
     setLoadingFiles(true);
     try {
@@ -77,29 +76,23 @@ export default function CandidateDetails({ candidate, onBack }) {
     }
   };
 
-  /**
-   * Requirement #5: Release Offer Letter
-   * Scans Drive for _Offer_Letter_MST and mails it.
-   */
   const handleReleaseOffer = async () => {
-    if (!window.confirm("Release MST Official Offer Letter and Employment Agreement to candidate?")) return;
+    if (!window.confirm("Release Official Offer Letter to candidate?")) return;
     setActionLoading(true);
     try {
       const res = await axios.post(`${API_URL}/workflow/release-offer-letter`, {
         candidateId: candidate.id
       });
-      alert(res.data.message || "Offer letter released successfully!");
+      alert(res.data.message || "Offer letter released!");
     } catch (err) {
-      alert(err.response?.data?.error || "Error: No offer letter found with the required naming convention (_Offer_Letter_MST).");
+      alert(err.response?.data?.error || "Error releasing offer.");
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleToggle = async (docKey, field) => {
-    const currentDoc = docStatus[docKey] || DEFAULT_DOC_SCHEMA[docKey];
-    const newValue = !currentDoc[field];
-    
+    const newValue = !docStatus[docKey][field];
     setDocStatus(prev => ({
       ...prev,
       [docKey]: { ...prev[docKey], [field]: newValue }
@@ -113,7 +106,7 @@ export default function CandidateDetails({ candidate, onBack }) {
         value: newValue
       });
     } catch (error) {
-      console.error("Backend update failed", error);
+      console.error("Update failed", error);
     }
   };
 
@@ -124,7 +117,7 @@ export default function CandidateDetails({ candidate, onBack }) {
         candidateId: candidate.id,
         mailNumber
       });
-      alert(`Mail sequence ${mailNumber} resent successfully!`);
+      alert("Reminder resent successfully!");
     } catch (err) {
       alert("Error resending mail.");
     } finally {
@@ -133,56 +126,58 @@ export default function CandidateDetails({ candidate, onBack }) {
   };
 
   const finalizeOnboarding = async () => {
-    if (!window.confirm("Mark this candidate as fully ONBOARDED?")) return;
+    if (!window.confirm("Finalize Onboarding?")) return;
     setActionLoading(true);
     try {
       await axios.post(`${API_URL}/workflow/finalize-onboarding`, { candidateId: candidate.id });
-      alert("Candidate Onboarded Successfully!");
+      alert("Success!");
       onBack(); 
     } catch (err) {
-      alert("Failed to finalize onboarding.");
+      alert("Failed.");
     } finally {
       setActionLoading(false);
     }
   };
 
-  if (!candidate) return null;
-
   return (
     <div className="card">
       <div className="detail-header">
-        <button className="back-button" onClick={onBack}>← Back to List</button>
+        <button className="back-button" onClick={onBack}>← Back</button>
         <div className="action-buttons">
           <button className="btn-secondary" onClick={() => triggerResend(1)} disabled={actionLoading}>
             Resend Provisional
           </button>
-          
-          {/* Requirement #5: Release Offer Letter Button */}
-          {candidate.status !== 'Onboarded' && (
-            <button 
-              className="btn-primary" 
-              onClick={handleReleaseOffer} 
-              disabled={actionLoading}
-              style={{ background: '#6366f1', color: 'white' }}
-            >
-              {actionLoading ? "Processing..." : "🚀 Release Offer Letter"}
-            </button>
-          )}
 
-          {candidate.status !== 'Onboarded' && (
-             <button 
-               className="btn-success" 
-               onClick={finalizeOnboarding} 
-               disabled={actionLoading} 
-               style={{marginLeft: '10px', background: '#10b981', color: 'white'}}
-             >
-               Finalize Onboarding
+          {/* DYNAMIC NUDGE BUTTON */}
+          {candidate.status === 'Waiting for HR NDA' ? (
+             <button className="btn-warning" onClick={() => triggerResend(2)} disabled={actionLoading}>
+               🔔 Nudge HR (NDA)
+             </button>
+          ) : (
+             <button className="btn-secondary" onClick={() => triggerResend(2)} disabled={actionLoading}>
+               Remind Candidate
              </button>
           )}
+          
+          <button className="btn-primary" onClick={handleReleaseOffer} disabled={actionLoading} style={{ background: '#6366f1' }}>
+            🚀 Release Offer
+          </button>
+
+          <button className="btn-success" onClick={finalizeOnboarding} disabled={actionLoading} style={{marginLeft: '10px', background: '#10b981'}}>
+            Finalize
+          </button>
         </div>
       </div>
 
       <div className="candidate-details">
+        {/* HR NDA ALERT */}
+        {candidate.status === 'Waiting for HR NDA' && (
+          <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', padding: '15px', borderRadius: '8px', marginBottom: '20px', color: '#9a3412' }}>
+            <strong>🕒 System Paused:</strong> Waiting for Jamuna (HR) to upload the unsigned NDA. 
+            The candidate will not be notified until the NDA is detected in the folder.
+          </div>
+        )}
+
         <div className="header-section">
           <h2>{candidate.name}</h2>
           <span className={`status-badge status-${candidate.status?.toLowerCase().replace(/\s+/g, '-')}`}>
@@ -193,36 +188,24 @@ export default function CandidateDetails({ candidate, onBack }) {
         <div className="info-grid">
            <div><strong>Email:</strong> {candidate.email}</div>
            <div><strong>Role:</strong> {candidate.role || 'Not set'}</div>
-           <div><strong>Folder ID:</strong> <code style={{fontSize: '11px'}}>{candidate.driveFolderId}</code></div>
+           <div><strong>Folder:</strong> <a href={`https://drive.google.com/drive/folders/${candidate.driveFolderId}`} target="_blank">View on Drive</a></div>
         </div>
 
         <hr/>
         
         <div className="section-title-row">
-          <h3>Document Verification Checklist</h3>
+          <h3>Verification Dashboard</h3>
           <button className="refresh-btn" onClick={handleManualSync} disabled={loadingFiles}>
-            {loadingFiles ? "Syncing..." : "🔄 Trigger Full Drive Sync"}
+            {loadingFiles ? "Scanning..." : "🔄 Force Sync Drive"}
           </button>
         </div>
-        
-        {candidate.driveFolderId && (
-          <div className="drive-link-box">
-            <a 
-              href={`https://drive.google.com/drive/folders/${candidate.driveFolderId}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              📂 Open Official Folder in Google Drive
-            </a>
-          </div>
-        )}
 
         <table className="doc-table">
           <thead>
             <tr>
               <th>Requirement</th>
               <th>Status</th>
-              <th>Detected PDF File</th>
+              <th>Detected PDF</th>
               <th className="text-center">Verified</th>
               <th className="text-center">Exception</th>
             </tr>
@@ -230,7 +213,6 @@ export default function CandidateDetails({ candidate, onBack }) {
           <tbody>
             {Object.keys(DEFAULT_DOC_SCHEMA).map((key) => {
               const doc = docStatus[key] || DEFAULT_DOC_SCHEMA[key];
-              
               const matchingFile = driveFiles.find(file => 
                 DOC_KEYWORDS[key].some(keyword => file.name.toLowerCase().includes(keyword))
               );
@@ -238,45 +220,26 @@ export default function CandidateDetails({ candidate, onBack }) {
               let statusLabel = "Missing";
               let badgeClass = "tag-error";
 
-              if (doc.verified) {
-                statusLabel = "Verified";
-                badgeClass = "tag-success";
-              } else if (doc.specialApproval) {
-                statusLabel = "Exception";
-                badgeClass = "tag-warning";
-              } else if (matchingFile || doc.uploaded) {
-                statusLabel = "Uploaded";
-                badgeClass = "tag-info";
-              }
+              if (doc.verified) { statusLabel = "Verified"; badgeClass = "tag-success"; }
+              else if (doc.specialApproval) { statusLabel = "Exception"; badgeClass = "tag-warning"; }
+              else if (matchingFile || doc.uploaded) { statusLabel = "Uploaded"; badgeClass = "tag-info"; }
 
               return (
-                <tr key={key}>
-                  <td><strong>{doc.name}</strong></td>
-                  <td>
-                    <span className={`tag ${badgeClass}`}>{statusLabel}</span>
-                  </td>
+                <tr key={key} style={key === 'nda' ? {background: '#f8fafc', fontWeight: 'bold'} : {}}>
+                  <td>{key === 'nda' ? '📜 ' : ''}{doc.name}</td>
+                  <td><span className={`tag ${badgeClass}`}>{statusLabel}</span></td>
                   <td>
                     {matchingFile ? (
-                      <a href={matchingFile.webViewLink} target="_blank" rel="noreferrer" className="pdf-link">
-                        📄 {matchingFile.name.length > 25 ? matchingFile.name.substring(0,25) + '...' : matchingFile.name}
+                      <a href={matchingFile.webViewLink} target="_blank" className="pdf-link">
+                        📄 {matchingFile.name.substring(0, 20)}...
                       </a>
-                    ) : (
-                      <span className="text-muted">Not found</span>
-                    )}
+                    ) : <span className="text-muted">Not detected</span>}
                   </td>
                   <td className="text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={doc.verified || false} 
-                      onChange={() => handleToggle(key, 'verified')}
-                    />
+                    <input type="checkbox" checked={doc.verified || false} onChange={() => handleToggle(key, 'verified')} />
                   </td>
                   <td className="text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={doc.specialApproval || false} 
-                      onChange={() => handleToggle(key, 'specialApproval')}
-                    />
+                    <input type="checkbox" checked={doc.specialApproval || false} onChange={() => handleToggle(key, 'specialApproval')} />
                   </td>
                 </tr>
               );
@@ -289,7 +252,7 @@ export default function CandidateDetails({ candidate, onBack }) {
           <div className="log-list">
             {(candidate.log || []).slice().reverse().map((entry, index) => (
               <div key={index} className="log-item">
-                <span className="log-time">{new Date(entry.timestamp).toLocaleString()}</span>
+                <span className="log-time">{new Date(entry.timestamp).toLocaleTimeString()}</span>
                 <span className="log-event">{entry.event}</span>
               </div>
             ))}
