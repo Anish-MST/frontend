@@ -370,3 +370,85 @@ input:focus {
 --------------------------------------------------------- */
 .text-center { text-align: center; }
 .text-muted { color: var(--text-muted); }
+/* ---------------------------------------------------------
+   10. SPECIAL INCENTIVE STYLES
+--------------------------------------------------------- */
+
+/* 10.1 Form Styles (AddCandidateForm) */
+.form-group-checkbox {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f0f7ff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px dashed var(--primary);
+  margin-top: 5px;
+}
+
+.form-group-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.form-group-checkbox label {
+  margin-bottom: 0; /* Align with checkbox */
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* 10.2 Detail View Styles (Incentive Box) */
+.incentive-box {
+  background: #fffbeb; /* Soft Amber */
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b; /* Amber 500 */
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.incentive-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.incentive-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #92400e;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.incentive-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #78350f;
+}
+
+.incentive-detail {
+  font-size: 0.85rem;
+  color: #92400e;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* 10.3 Badge for Tables */
+.tag-incentive {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  margin-left: 8px;
+  vertical-align: middle;
+}

@@ -98,18 +98,16 @@ export default function AddCandidateForm({ onCandidateAdded }) {
         </div>
 
         {/* Special Incentive Checkbox */}
-        <div className="form-group" style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
-          <input 
-            type="checkbox" 
-            name="hasSpecialIncentive" 
-            id="hasSpecialIncentive"
-            checked={formData.hasSpecialIncentive} 
-            onChange={handleChange} 
-          />
-          <label htmlFor="hasSpecialIncentive" style={{ fontWeight: "bold", cursor: "pointer", color: "#1A73E8" }}>
-            Add Special Incentive?
-          </label>
-        </div>
+<div className="form-group-checkbox">
+  <input 
+    type="checkbox" 
+    name="hasSpecialIncentive" 
+    id="hasSpecialIncentive"
+    checked={formData.hasSpecialIncentive} 
+    onChange={handleChange} 
+  />
+  <label htmlFor="hasSpecialIncentive">Add special incentive</label>
+</div>
 
         {/* Conditional Incentive Inputs */}
         {formData.hasSpecialIncentive && (
