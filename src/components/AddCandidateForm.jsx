@@ -14,14 +14,21 @@ export default function AddCandidateForm({ onCandidateAdded }) {
     role: '',
     salary: '',
     experience: '',
-    dateOfJoining: ''
+    dateOfJoining: '',
+    hasSpecialIncentive: false,
+    specialIncentiveDetail: '',
+    specialIncentiveAmount: ''
   });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ 
+      ...formData, 
+      [name]: type === 'checkbox' ? checked : value 
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -37,7 +44,10 @@ export default function AddCandidateForm({ onCandidateAdded }) {
         role: '',
         salary: '',
         experience: '',
-        dateOfJoining: ''
+        dateOfJoining: '',
+        hasSpecialIncentive: false,
+        specialIncentiveDetail: '',
+        specialIncentiveAmount: ''
       });
       onCandidateAdded();
     } catch (error) {
@@ -51,60 +61,87 @@ export default function AddCandidateForm({ onCandidateAdded }) {
     <div className="card">
       <h2 className="card-title">Add New Candidate</h2>
       <form onSubmit={handleSubmit} className="form-grid">
-
         <div className="form-group">
           <label>Name</label>
-          <br></br>
+          <br />
           <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         </div>
 
         <div className="form-group">
           <label>Email</label>
-          <br></br>
+          <br />
           <input type="email" name="email" value={formData.email} onChange={handleChange} required />
         </div>
 
         <div className="form-group">
           <label>Role</label>
-          <br></br>
+          <br />
           <input type="text" name="role" value={formData.role} onChange={handleChange} required />
         </div>
 
         <div className="form-group">
-          <label>Salary</label>
-          <br></br>
+          <label>Annual CTC (Salary)</label>
+          <br />
           <input type="number" name="salary" value={formData.salary} onChange={handleChange} required />
         </div>
 
-        {/* NEW: Experience */}
         <div className="form-group">
           <label>Experience (Years)</label>
-          <br></br>
-          <input
-            type="number"
-            name="experience"
-            value={formData.experience}
-            onChange={handleChange}
-            required
-            min="0"
-          />
+          <br />
+          <input type="number" name="experience" value={formData.experience} onChange={handleChange} required min="0" />
         </div>
 
-        {/* NEW: Date of Joining */}
         <div className="form-group">
           <label>Date of Joining</label>
-          <br></br>
-          
-          <input
-            type="date"
-            name="dateOfJoining"
-            value={formData.dateOfJoining}
-            onChange={handleChange}
-            required
-          />
+          <br />
+          <input type="date" name="dateOfJoining" value={formData.dateOfJoining} onChange={handleChange} required />
         </div>
 
-        <button type="submit" disabled={loading}>
+        {/* Special Incentive Checkbox */}
+        <div className="form-group" style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
+          <input 
+            type="checkbox" 
+            name="hasSpecialIncentive" 
+            id="hasSpecialIncentive"
+            checked={formData.hasSpecialIncentive} 
+            onChange={handleChange} 
+          />
+          <label htmlFor="hasSpecialIncentive" style={{ fontWeight: "bold", cursor: "pointer", color: "#1A73E8" }}>
+            Add Special Incentive?
+          </label>
+        </div>
+
+        {/* Conditional Incentive Inputs */}
+        {formData.hasSpecialIncentive && (
+          <>
+            <div className="form-group">
+              <label>Incentive Amount (₹)</label>
+              <br />
+              <input 
+                type="number" 
+                name="specialIncentiveAmount" 
+                value={formData.specialIncentiveAmount} 
+                onChange={handleChange} 
+                placeholder="e.g. 50000"
+                required 
+              />
+            </div>
+            <div className="form-group">
+              <label>Incentive Type / Details</label>
+              <br />
+              <input 
+                type="text" 
+                name="specialIncentiveDetail" 
+                value={formData.specialIncentiveDetail} 
+                onChange={handleChange} 
+                placeholder="e.g. Joining Bonus"
+                required 
+              />
+            </div>
+          </>
+        )}
+
+        <button type="submit" disabled={loading} style={{ gridColumn: "1 / -1", marginTop: "10px" }}>
           {loading ? 'Starting...' : 'Start Workflow'}
         </button>
       </form>
