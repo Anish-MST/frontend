@@ -24,7 +24,7 @@ function App() {
 
     // Ping immediately on load and then every 10 minutes
     pingBackend();
-    const pingInterval = setInterval(pingBackend, 10 * 60 * 1000);
+    const pingInterval = setInterval(pingBackend, 5 * 60 * 1000);
 
     /**
      * 2. INACTIVITY RELOAD
@@ -39,7 +39,7 @@ function App() {
       inactivityTimer = setTimeout(() => {
         console.log("Inactivity detected for 15 mins. Refreshing page...");
         window.location.reload();
-      }, 15 * 60 * 1000);
+      }, 5 * 60 * 1000);
     };
 
     // List of events that reset the inactivity clock
