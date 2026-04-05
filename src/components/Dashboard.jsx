@@ -63,9 +63,6 @@ export default function Dashboard() {
           <CandidateDetails candidate={selectedCandidate} onBack={handleBackToList} />
         )}
       </div>
-      <div className="chat-panel">
-        <Chatbot />
-      </div>
     </div>
   );
 }
